@@ -64,7 +64,7 @@ and build using JDK 8:
 ./mvnw clean package
 ```
 
-And build using:
+And build the OCI container using `BP_JVM_VERSION=8`:
 
 ```
 pack build application/demo --builder paketobuildpacks/builder:base --path target/demo-0.0.1-SNAPSHOT.jar --env BP_JVM_VERSION=8 --env BP_DEBUG_ENABLED=true
