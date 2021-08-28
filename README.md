@@ -1,6 +1,8 @@
 # Spring Boot Paketo Debug buildpack issue: "handshake failed - connection prematurally closed"
 
-Sample project to reproduce an issue the the Paketo debug JVM buildpack
+Sample project to reproduce an issue the the Paketo debug JVM buildpack.
+
+See issue on Github: [https://github.com/paketo-buildpacks/debug/issues/43](https://github.com/paketo-buildpacks/debug/issues/43)
 
 ## Prerequisites 
 
@@ -79,7 +81,7 @@ docker run --rm --tty --publish 8080:8080 --publish 8000:8000 --env BPL_DEBUG_EN
 I can start the remote JVM debug session without any problem:
 Connected to the target VM, address: ':8000', transport: 'socket'
 
-## Work around
+## Work around 1
 
 The workaround I use now is to use Java 11 and build without the `BP_DEBUG_ENABLED=true` flag
 
@@ -92,6 +94,20 @@ and add JVM remote debug settings myself using the `JAVA_TOOL_OPTIONS`:
 ```
 docker run --rm --tty --publish 8080:8080 --publish 8000:8000 --env JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n
 address=*:8000" application/demo
+```
+
+## Work around 2
+
+A more clean work around I use today is to build the OCI image using the `--env BP_DEBUG_ENABLED=true` flag:
+
+```
+pack build application/demo --builder paketobuildpacks/builder:base --path target/demo-0.0.1-SNAPSHOT.jar --env BP_JVM_VERSION=11 --env BP_DEBUG_ENABLED=true
+```
+
+And explicitly set the `BPL_DEBUG_PORT` to `*:8000`
+
+```
+docker run --rm --tty --publish 8080:8080 --publish 8000:8000 --env BPL_DEBUG_ENABLED=true --env BPL_DEBUG_PORT=*:8000 application/demo
 ```
 
 ## Possible cause why it's not working for Java 11 
